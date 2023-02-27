@@ -93,4 +93,11 @@ if (upload_file is not None):
             ax.set_yticks(range(0, 101, 10))
             plt.xlabel(algorithm)
             plt.ylabel('F1 Score (%)')
+            
+            #show metrics chart
+            cm = metrics.confusion_matrix(y_test, y_pred, labels = model.classes_)
             st.pyplot(fig)
+
+            disp = metrics.ConfusionMatrixDisplay(confusion_matrix = cm, display_labels=model.classes_)
+            disp.plot()
+            st.pyplot()
