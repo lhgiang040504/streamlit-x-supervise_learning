@@ -28,14 +28,14 @@ if (upload_file is not None):
     df = pd.read_csv(upload_file)  
     st.dataframe(df)
     
-    #Xử lý số liệu
-    df.dropna(inplace = True) # Xóa các dòng Nan
-    le = LabelEncoder() # Sửa chữ thành số
-    is_Category = df.dtypes == object # Gán các cột có giá trị object thì trả về True
-    category_column_list = df.columns[is_Category].tolist() # List các cột có giá trị là object
+    #clean data
+    df.dropna(inplace = True)
+    le = LabelEncoder()
+    is_Category = df.dtypes == object 
+    category_column_list = df.columns[is_Category].tolist()
     df[category_column_list] = df[category_column_list].apply(lambda col: le.fit_transform(col)) # biến object thành số
 
-    # Chọn các cột để train
+    #chosse features
     st.markdown(":two: **_:blue[Choose Input Feature]_**")
     st.write("What columns do you want to use for training", str(df.columns[-1]), ':first_quarter_moon:')
     choice = []
@@ -47,7 +47,7 @@ if (upload_file is not None):
     df = df.iloc[:, choice]
     st.dataframe(df)
     
-    # Chọn thuật toán
+    # chosse algorithm
     if (run): 
         st.markdown(":three: **_:blue[Choose Algorithm]_**")
         algorithm = st.selectbox(
@@ -57,7 +57,7 @@ if (upload_file is not None):
 
         st.markdown(":four: **_:blue[Drawing explicity chart]_**")
         
-        # Chọn tỉ lệ train/test
+        #chosse train/test ratio
         ratio = st.slider('Choose train size :full_moon::', 0.0, 1.0, 0.25)
         if (ratio == 1 or ratio == 0):
             st.markdown("**Choose another value please**")
@@ -67,7 +67,7 @@ if (upload_file is not None):
             y = data[:, -1].astype('int')
             x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=ratio)
             
-            # Tính toán số liệu
+            #calculate model
             y_pred = []
             if (algorithm == 'Logictic Regression') :
                 model = LogisticRegression()
@@ -85,4 +85,12 @@ if (upload_file is not None):
 
             accuracy_values = [f1_train, f1_test]
             accuracy_values = np.array([round(accuracy_value*100, 2) for accuracy_value in accuracy_values ])
-            st.write(accuracy_values)
+            
+            #show chart
+            fig, ax = plt.subplots()
+            ax.bar(["f1_train", "f1_test"], accuracy_values, 0.6, 0.01)
+            ax.set_xticks(["f1_train", "f1_test"])
+            ax.set_yticks(range(0, 101, 10))
+            plt.xlabel(algorithm)
+            plt.ylabel('F1 Score (%)')
+            st.pyplot(fig)
